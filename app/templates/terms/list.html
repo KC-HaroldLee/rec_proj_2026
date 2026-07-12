@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}용어사전 - 사참위 권고 이행 모니터링{% endblock %}
+
+{% block content %}
+<div class="section-title"><h2>용어사전</h2></div>
+
+<form class="card" method="post" action="/terms" style="margin-bottom: 32px;">
+  <div class="field"><label>용어</label><input type="text" name="term" required></div>
+  <div class="field"><label>사전적 정의</label><input type="text" name="definition" required></div>
+  <div class="field"><label>이 프로젝트 맥락 (선택)</label><input type="text" name="context"></div>
+  <div class="field"><label>분류 (선택)</label><input type="text" name="category" placeholder="사회적개념/법률용어/기관약칭 등"></div>
+  <button class="btn" type="submit">추가</button>
+</form>
+
+<div class="table">
+  <div class="row head" style="grid-template-columns: 140px 1fr 120px;">
+    <div>용어</div>
+    <div>정의</div>
+    <div>관리</div>
+  </div>
+  {% for t in terms %}
+  {% include "partials/term_row.html" %}
+  {% else %}
+  <div class="empty">등록된 용어가 없습니다.</div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+<div class="row" id="term-{{ t.term_id }}" style="grid-template-columns: 1fr;">
+  <form hx-post="/terms/{{ t.term_id }}" hx-target="#term-{{ t.term_id }}" hx-swap="outerHTML"
+    style="display: flex; flex-direction: column; gap: 8px;">
+    <input type="text" name="term" value="{{ t.term }}" required>
+    <input type="text" name="definition" value="{{ t.definition }}" required>
+    <input type="text" name="context" value="{{ t.context or '' }}" placeholder="이 프로젝트 맥락 (선택)">
+    <input type="text" name="category" value="{{ t.category or '' }}" placeholder="분류 (선택)">
+    <div style="display: flex; gap: 8px;">
+      <button class="btn" type="submit" style="width: auto; padding: 8px 18px; margin-top: 0;">저장</button>
+      <button class="filter-chip" type="button"
+        hx-get="/terms/{{ t.term_id }}" hx-target="#term-{{ t.term_id }}" hx-swap="outerHTML">취소</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ rec.rec_no }} - 사참위 권고 이행 모니터링{% endblock %}
+
+{% block content %}
+<div class="section-title">
+  <h2>{{ rec.rec_no }} · {{ rec.category }}</h2>
+</div>
+
+<div class="card markdown-body" style="margin-bottom: 24px;">
+  {{ content_html | safe }}
+</div>
+
+{% if necessity_html %}
+<div class="section-title"><h2>필요성</h2></div>
+<div class="card markdown-body" style="margin-bottom: 32px;">
+  {{ necessity_html | safe }}
+</div>
+{% endif %}
+
+<div class="section-title"><h2>대상기관·연도별 이행현황</h2></div>
+<p class="sub" style="border: none; padding: 0; margin-bottom: 20px;">
+  아래 "이행현황"·"향후계획"은 해당 기관이 스스로 작성해 제출한 자기보고입니다.
+  옆의 배지는 저희가 전년도 대비 텍스트가 객관적으로 바뀌었는지만 비교한 결과이며,
+  실제로 이행이 됐는지 판단하는 게 아닙니다 — 정부 주장과 객관적 증거를 나란히 두고
+  직접 비교해보시라는 취지입니다.
+</p>
+
+{% if institutions|length > 1 %}
+<div class="filters" style="margin-bottom: 24px;">
+  {% for inst in institutions %}
+  <a class="filter-chip inst-tab" data-inst="{{ inst.inst_id }}" href="#inst-{{ inst.inst_id }}">{{ inst.name }}</a>
+  {% endfor %}
+</div>
+<script src="/static/js/rec-detail.js" defer></script>
+{% endif %}
+
+{% for inst in institutions %}
+<div class="inst-block" id="inst-{{ inst.inst_id }}" data-inst-block="{{ inst.inst_id }}">
+  <h3><a href="/institutions/{{ inst.inst_id }}">{{ inst.name }}</a></h3>
+  {% if inst.years %}
+  <div class="timeline">
+    {% for y in inst.years %}
+    <div class="timeline-year" id="impl-{{ y.impl_id }}">
+      <div class="year-label">
+        {{ y.year }}
+        {% if y.badge == 'stuck' %}<span class="status-badge stuck">{{ y.badge_label }}</span>
+        {% elif y.badge == 'suspect' %}<span class="status-badge suspect">{{ y.badge_label }}</span>
+        {% elif y.badge == 'progress' %}<span class="status-badge progress">{{ y.badge_label }}</span>
+        {% elif y.badge == 'watch' %}<span class="status-badge watch">{{ y.badge_label }}</span>
+        {% endif %}
+      </div>
+
+      {% if not y.status_html and not y.plan_html %}
+      <p class="sub" style="margin: 0 0 8px; padding: 8px 10px; border: 1px dashed var(--line); background: var(--paper);">
+        이 연도는 이행현황·향후계획이 모두 비어있는 보고입니다 (원문 자체에 내용 없음).
+      </p>
+      {% endif %}
+
+      {% if y.status_html %}
+      <div class="field-label">이행현황 (기관 자체 보고)</div>
+      <div class="markdown-body">{{ y.status_html | safe }}</div>
+      {% endif %}
+
+      {% if y.plan_html %}
+      <div class="field-label">향후계획</div>
+      <div class="markdown-body">{{ y.plan_html | safe }}</div>
+      {% endif %}
+
+      {% if y.source %}<p class="sub" style="margin: 8px 0 0; padding: 0; border: none;">출처: {{ y.source }}</p>{% endif %}
+
+      <div class="feedback-mini">
+        {% for f in y.feedback %}
+        <div class="feed-item">
+          <div class="feed-avatar">{{ f.auth_name[:1] }}</div>
+          <div class="feed-body">
+            <div class="meta"><b>{{ f.auth_name }}</b> · {{ f.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+            {{ f.content }}
+            {% if f.evidence_url %}<br><a href="{{ f.evidence_url }}" target="_blank" rel="noopener">근거 링크 →</a>{% endif %}
+          </div>
+        </div>
+        {% else %}
+        <p class="sub" style="margin: 0; padding: 0; border: none;">등록된 피드백이 없습니다.</p>
+        {% endfor %}
+
+        <form class="feedback-form" method="post" action="/impl/{{ y.impl_id }}/feedback">
+          <input type="text" name="content" placeholder="이 이행현황에 대한 검증 기록을 남겨주세요" required>
+          <input type="text" name="evidence_url" placeholder="근거 링크 (선택)" style="flex: 0.6;">
+          <button type="submit">등록</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="sub" style="margin: 0 0 20px; padding: 0; border: none;">아직 등록된 이행보고가 없습니다.</p>
+  {% endif %}
+</div>
+{% else %}
+<p class="empty">대상기관 정보 없음</p>
+{% endfor %}
+
+<div class="section-title"><h2>관련조사자료</h2></div>
+<div class="table" style="margin-bottom: 24px;">
+  {% for evid in evidences %}
+  <div class="row" style="grid-template-columns: 100px 1fr;">
+    <div class="no">{{ evid.code or '-' }}</div>
+    <div class="content">{{ evid.title }}</div>
+  </div>
+  {% else %}
+  <div class="empty">관련조사자료 없음</div>
+  {% endfor %}
+</div>
+{% endblock %}

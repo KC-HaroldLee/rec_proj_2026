@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}대시보드 - 사참위 권고 이행 모니터링{% endblock %}
+
+{% block content %}
+<div class="search-block">
+  <div class="search-eyebrow">무엇이 궁금하신가요</div>
+  <form class="search-box" method="get" action="/search">
+    <input type="text" name="q" placeholder='예: 몇 년째 "해당사항 없음"으로 남아있는 항목이 뭐야?'>
+    <button type="submit">물어보기</button>
+  </form>
+  <div class="search-hint">자연어로 질문하면 관련 권고와 이행현황을 찾아 답변합니다.</div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="num">{{ total_recs }}</div>
+    <div class="label">전체 권고 ({% for row in by_category %}{{ row.category }} {{ row.cnt }}{% if not loop.last %} · {% endif %}{% endfor %})</div>
+  </div>
+  <div class="stat warn">
+    <div class="num">{{ stuck_items|length }}</div>
+    <div class="label">정체(완전동일) · 의심(유사) 항목 수</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ inst_count }}</div>
+    <div class="label">권고 대상기관 수</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ recent_feedback|length }}</div>
+    <div class="label">최근 시민 피드백</div>
+  </div>
+</div>
+
+<div class="section-title">
+  <h2>정체된 권고 항목</h2>
+  <div class="more"><a href="/recs">전체 목록 보기 →</a></div>
+</div>
+<div class="filters">
+  <a class="filter-chip{% if selected_category == 'all' %} active{% endif %}" href="/?category=all">전체</a>
+  {% for c in categories %}
+  <a class="filter-chip{% if selected_category == c %} active{% endif %}" href="/?category={{ c | urlencode }}">{{ c }}</a>
+  {% endfor %}
+</div>
+{% include "partials/stuck_table.html" %}
+
+<div class="section-title">
+  <h2>최근 시민 피드백</h2>
+  <div class="more">전체 보기 →</div>
+</div>
+{% include "partials/feedback_feed.html" %}
+{% endblock %}

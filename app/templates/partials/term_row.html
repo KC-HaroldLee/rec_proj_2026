@@ -1,0 +1,15 @@
+<div class="row" id="term-{{ t.term_id }}" style="grid-template-columns: 140px 1fr 120px;">
+  <div class="no">{{ t.term }}</div>
+  <div class="content">
+    {{ t.definition }}
+    {% if t.context %}<p class="sub" style="margin: 6px 0 0; padding: 0; border: none;">{{ t.context }}</p>{% endif %}
+    {% if t.category %}<span class="inst-tag" style="margin-top: 6px; display: inline-block;">{{ t.category }}</span>{% endif %}
+  </div>
+  <div style="display: flex; gap: 6px; align-items: flex-start;">
+    <button class="filter-chip" type="button"
+      hx-get="/terms/{{ t.term_id }}/edit" hx-target="#term-{{ t.term_id }}" hx-swap="outerHTML">수정</button>
+    <button class="filter-chip" type="button"
+      hx-post="/terms/{{ t.term_id }}/delete" hx-target="#term-{{ t.term_id }}" hx-swap="outerHTML"
+      hx-confirm="&quot;{{ t.term }}&quot; 용어를 삭제하시겠습니까?">삭제</button>
+  </div>
+</div>

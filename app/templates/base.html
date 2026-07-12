@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}사참위 권고 이행 모니터링{% endblock %}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<script src="/static/js/htmx.min.js" defer></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+{% block body %}
+<header>
+  <a href="/" class="brand">사참위 권고 이행 모니터링</a>
+  <nav>
+    <a href="/" class="{{ 'active' if active_nav == 'dashboard' else '' }}">대시보드</a>
+    <a href="/recs" class="{{ 'active' if active_nav == 'recs' else '' }}">권고 목록</a>
+    <a href="/institutions" class="{{ 'active' if active_nav == 'institutions' else '' }}">기관별 현황</a>
+    <a href="/terms" class="{{ 'active' if active_nav == 'terms' else '' }}">용어사전</a>
+  </nav>
+  <div class="user-chip">
+    {% if user %}
+    <div class="avatar">{{ user.auth_name[:1] }}</div>
+    {{ user.auth_name }}
+    {% endif %}
+  </div>
+</header>
+
+<main>
+{% block content %}{% endblock %}
+</main>
+{% endblock %}
+
+</body>
+</html>

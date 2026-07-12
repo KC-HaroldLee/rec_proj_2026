@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}기관별 현황 - 사참위 권고 이행 모니터링{% endblock %}
+
+{% block content %}
+<div class="section-title"><h2>기관별 현황</h2></div>
+<p class="sub" style="border: none; padding: 0;">
+  "정체 아님 비율"은 이행완료를 뜻하지 않습니다 — 최근 연도 status 텍스트가 전년도와
+  달라진 링크의 비율일 뿐입니다. 실질적 이행 여부는 권고 상세 페이지에서 원문을 직접 확인하세요.
+</p>
+
+<div class="filters" style="margin-top: 16px;">
+  <a class="filter-chip{% if selected_category == 'all' %} active{% endif %}" href="/institutions?category=all">전체</a>
+  {% for c in categories %}
+  <a class="filter-chip{% if selected_category == c %} active{% endif %}" href="/institutions?category={{ c | urlencode }}">{{ c }}</a>
+  {% endfor %}
+</div>
+
+<div class="filters" style="margin-top: 8px; margin-bottom: 16px;">
+  <a class="filter-chip{% if not selected_rec %} active{% endif %}" href="/institutions?category={{ selected_category | urlencode }}">전체 권고</a>
+  {% for r in rec_options %}
+  <a class="filter-chip{% if selected_rec and selected_rec.rec_no == r.rec_no %} active{% endif %}"
+     href="/institutions?category={{ selected_category | urlencode }}&rec_no={{ r.rec_no | urlencode }}">{{ r.rec_no }}</a>
+  {% endfor %}
+</div>
+
+{% if selected_rec %}
+<div class="section-title"><h2>{{ selected_rec.rec_no }} 담당 기관별 현황</h2></div>
+<p class="sub" style="border: none; padding: 0; margin-bottom: 12px;">
+  {{ selected_rec.content[:150] }}{% if selected_rec.content|length > 150 %}...{% endif %}
+  <a href="/recs/{{ selected_rec.rec_id }}">권고 상세 보기 →</a>
+</p>
+<p class="sub" style="border: none; padding: 0; margin-bottom: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 4px;">
+  <span class="year-dot stuck" style="width: 14px; height: 14px; font-size: 0;"></span><span>전년도와 완전 동일 /</span>
+  <span class="year-dot suspect" style="width: 14px; height: 14px; font-size: 0;"></span><span>유사(의심) /</span>
+  <span class="year-dot progress" style="width: 14px; height: 14px; font-size: 0;"></span><span>전년도와 다름(변화) /</span>
+  <span class="year-dot watch" style="width: 14px; height: 14px; font-size: 0;"></span><span>비교 불가.</span>
+</p>
+<div class="table">
+  <div class="row head" style="grid-template-columns: 1fr 110px 90px 1fr;">
+    <div>기관명</div>
+    <div>연도별</div>
+    <div>상태</div>
+    <div>최근 status 원문</div>
+  </div>
+  {% for inst in rec_institutions %}
+  <div class="row" style="grid-template-columns: 1fr 110px 90px 1fr;">
+    <div class="content"><a href="/institutions/{{ inst.inst_id }}">{{ inst.name }}</a></div>
+    <div class="years">
+      {% for y in inst.years %}
+      <div class="year-dot{% if y.badge %} {{ y.badge }}{% endif %}" title="{{ y.year }}{% if y.badge_label %} · {{ y.badge_label }}{% endif %}">{{ '%02d' % (y.year % 100) }}</div>
+      {% endfor %}
+    </div>
+    <div>
+      {% if inst.latest_badge == 'stuck' %}<span class="status-badge stuck">{{ inst.latest_badge_label }}</span>
+      {% elif inst.latest_badge == 'suspect' %}<span class="status-badge suspect">{{ inst.latest_badge_label }}</span>
+      {% elif inst.latest_badge == 'progress' %}<span class="status-badge progress">{{ inst.latest_badge_label }}</span>
+      {% elif inst.latest_badge == 'watch' %}<span class="status-badge watch">{{ inst.latest_badge_label }}</span>
+      {% else %}<span class="status-badge watch">자료 부족</span>
+      {% endif %}
+    </div>
+    <div class="sub" style="border: none; padding: 0; margin: 0;">
+      {{ (inst.latest_status[:80] + '...') if inst.latest_status and inst.latest_status|length > 80 else (inst.latest_status or '-') }}
+    </div>
+  </div>
+  {% else %}
+  <div class="empty">대상기관이 없습니다.</div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="table">
+  <div class="row head" style="grid-template-columns: 1fr 120px 160px;">
+    <div>기관명</div>
+    <div>관련 권고 수</div>
+    <div>정체 아님 비율</div>
+  </div>
+  {% for inst in institutions %}
+  <div class="row" style="grid-template-columns: 1fr 120px 160px;">
+    <div class="content"><a href="/institutions/{{ inst.inst_id }}">{{ inst.name }}</a></div>
+    <div>{{ inst.rec_count }}</div>
+    <div>
+      {% if inst.not_stuck_rate is not none %}
+      {{ inst.not_stuck_rate }}% <span class="sub" style="border:none;padding:0;display:inline;">({{ inst.not_stuck }}/{{ inst.tracked }})</span>
+      {% else %}
+      <span class="sub" style="border:none;padding:0;">판단 자료 부족</span>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="empty">등록된 기관이 없습니다.</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

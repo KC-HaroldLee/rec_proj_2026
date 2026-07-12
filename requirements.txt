@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+jinja2
+psycopg[binary]
+itsdangerous
+python-multipart
+python-dotenv
+requests
+markdown

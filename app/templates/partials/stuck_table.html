@@ -1,0 +1,27 @@
+{# 행 단위 = REC_INST 링크(권고+기관 조합). docs/design-decisions.md의 "이행현황이 기관별로
+   다르게 오는지" 미확인 사항 참고 — 같은 권고가 기관별로 여러 행에 나뉘어 보일 수 있음. #}
+<div class="table">
+  <div class="row head">
+    <div>번호</div>
+    <div>권고 내용</div>
+    <div>연도별 변화</div>
+    <div>상태</div>
+  </div>
+  {% for item in stuck_items %}
+  <div class="row">
+    <div class="no">{{ item.rec_no }}</div>
+    <div class="content">
+      <a href="/recs/{{ item.rec_id }}">{{ item.content[:70] }}{% if item.content|length > 70 %}...{% endif %}</a>
+      <div class="inst-tags"><span class="inst-tag">{{ item.inst_name }}</span></div>
+    </div>
+    <div class="years">
+      {% for y in item.years %}
+      <div class="year-dot{% if y.same_as_prev %} same{% endif %}">{{ '%02d' % (y.year % 100) }}</div>
+      {% endfor %}
+    </div>
+    <div><span class="status-badge {{ 'stuck' if item.badge == 'stuck' else 'suspect' }}">{{ item.badge_label }}</span></div>
+  </div>
+  {% else %}
+  <div class="empty">정체된 항목이 아직 없습니다.</div>
+  {% endfor %}
+</div>

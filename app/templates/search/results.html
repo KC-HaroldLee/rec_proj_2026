@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{% if query %}"{{ query }}" 검색결과{% else %}검색{% endif %} - 사참위 권고 이행 모니터링{% endblock %}
+
+{% block content %}
+<div class="search-block">
+  <div class="search-eyebrow">무엇이 궁금하신가요</div>
+  <form class="search-box" method="get" action="/search">
+    <input type="text" name="q" value="{{ query or '' }}" placeholder='예: 몇 년째 "해당사항 없음"으로 남아있는 항목이 뭐야?'>
+    <button type="submit">물어보기</button>
+  </form>
+  <div class="search-hint">자연어로 질문하면 관련 권고와 이행현황을 찾아 답변합니다.</div>
+</div>
+
+{% if query %}
+<div class="section-title"><h2>검색결과</h2></div>
+<div class="card" style="margin-bottom: 24px;">
+  <p class="sub" style="margin: 0 0 12px; padding: 0; border: none;">질문: {{ query }}</p>
+  {% if error %}
+  <p class="error" style="margin-top: 0;">{{ error }}</p>
+  {% else %}
+  <p>{{ answer }}</p>
+  {% if sql %}
+  <details style="margin-top: 14px;">
+    <summary style="cursor: pointer; font-size: 12.5px; color: var(--muted);">어떤 쿼리로 조회했는지 보기</summary>
+    <pre style="white-space: pre-wrap; font-size: 12px; margin-top: 8px; background: var(--paper); padding: 10px; border: 1px solid var(--line);">{{ sql }}</pre>
+  </details>
+  {% endif %}
+  {% endif %}
+</div>
+
+{% if columns %}
+<div class="section-title"><h2>근거 레코드</h2></div>
+<p class="sub" style="border: none; padding: 0;">
+  위 SQL 조회 결과 원본입니다. rec_id/inst_id가 있으면 해당 상세 페이지로 바로 이동할 수 있습니다.
+</p>
+<div class="table" style="margin: 16px 0 24px; overflow-x: auto;">
+  <div class="row head" style="grid-template-columns: repeat({{ columns|length }}, minmax(100px, 1fr));">
+    {% for col in columns %}<div>{{ col }}</div>{% endfor %}
+  </div>
+  {% for cells in table_rows %}
+  <div class="row" style="grid-template-columns: repeat({{ columns|length }}, minmax(100px, 1fr));">
+    {% for cell in cells %}
+    <div class="content">
+      {% if cell.url %}<a href="{{ cell.url }}">{{ cell.value }}</a>{% else %}{{ cell.value if cell.value is not none else '-' }}{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

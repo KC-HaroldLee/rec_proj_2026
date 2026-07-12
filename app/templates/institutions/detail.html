@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ inst.name }} - 사참위 권고 이행 모니터링{% endblock %}
+
+{% block content %}
+<div class="section-title"><h2>{{ inst.name }}</h2></div>
+{% if inst.note %}<p class="sub">{{ inst.note }}</p>{% endif %}
+
+<div class="filters">
+  <a class="filter-chip{% if selected_category == 'all' %} active{% endif %}" href="/institutions/{{ inst.inst_id }}?category=all">전체</a>
+  {% for c in categories %}
+  <a class="filter-chip{% if selected_category == c %} active{% endif %}" href="/institutions/{{ inst.inst_id }}?category={{ c | urlencode }}">{{ c }}</a>
+  {% endfor %}
+</div>
+
+<div class="stats" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="stat">
+    <div class="num">{{ recs|length }}</div>
+    <div class="label">관련 권고 수</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ not_stuck_rate if not_stuck_rate is not none else '-' }}{% if not_stuck_rate is not none %}%{% endif %}</div>
+    <div class="label">정체 아님 비율 ({{ not_stuck }}/{{ tracked }}, 판단 가능한 링크 기준)</div>
+  </div>
+  <div class="stat">
+    <div class="num">{{ recs|length - tracked }}</div>
+    <div class="label">이행보고 자료 부족 (연도 2개 미만)</div>
+  </div>
+</div>
+<p class="sub" style="border: none; padding: 0; margin-bottom: 24px;">
+  "정체 아님"은 이행완료를 뜻하지 않습니다 — 최근 연도 status 텍스트가 전년도와
+  달라졌다는 뜻일 뿐입니다. 아래 각 권고의 "최근 status"는 정부가 쓴 원문 그대로이니
+  직접 읽고 판단해주세요.
+</p>
+
+<div class="section-title"><h2>관련 권고</h2></div>
+<p class="sub" style="border: none; padding: 0; margin-bottom: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 4px;">
+  <span>"연도별" 사각형은 신호등입니다 —</span>
+  <span class="year-dot stuck" style="width: 14px; height: 14px; font-size: 0;"></span><span>전년도와 완전 동일 /</span>
+  <span class="year-dot suspect" style="width: 14px; height: 14px; font-size: 0;"></span><span>유사(의심) /</span>
+  <span class="year-dot progress" style="width: 14px; height: 14px; font-size: 0;"></span><span>전년도와 다름(변화) /</span>
+  <span class="year-dot watch" style="width: 14px; height: 14px; font-size: 0;"></span><span>비교 불가(전년도 status가 비어있음).</span>
+  <span>테두리만 있는 흰 사각형은 그 기관의 첫 보고(비교 대상 자체가 없음)라 신호가 없는 것입니다.
+  마우스를 올리면 자세한 내용이 나옵니다.</span>
+</p>
+<div class="table">
+  <div class="row head" style="grid-template-columns: 70px 1fr 110px 90px 1fr;">
+    <div>번호</div>
+    <div>권고 내용</div>
+    <div>연도별</div>
+    <div>상태</div>
+    <div>최근 status 원문</div>
+  </div>
+  {% for rec in recs %}
+  <div class="row" style="grid-template-columns: 70px 1fr 110px 90px 1fr;">
+    <div class="no">{{ rec.rec_no }}</div>
+    <div class="content"><a href="/recs/{{ rec.rec_id }}">{{ rec.content[:60] }}{% if rec.content|length > 60 %}...{% endif %}</a></div>
+    <div class="years">
+      {% for y in rec.years %}
+      <div class="year-dot{% if y.badge %} {{ y.badge }}{% endif %}" title="{{ y.year }}{% if y.badge_label %} · {{ y.badge_label }}{% endif %}">{{ '%02d' % (y.year % 100) }}</div>
+      {% endfor %}
+    </div>
+    <div>
+      {% if rec.latest_badge == 'stuck' %}<span class="status-badge stuck">{{ rec.latest_badge_label }}</span>
+      {% elif rec.latest_badge == 'suspect' %}<span class="status-badge suspect">{{ rec.latest_badge_label }}</span>
+      {% elif rec.latest_badge == 'progress' %}<span class="status-badge progress">{{ rec.latest_badge_label }}</span>
+      {% elif rec.latest_badge == 'watch' %}<span class="status-badge watch">{{ rec.latest_badge_label }}</span>
+      {% else %}<span class="status-badge watch">자료 부족</span>
+      {% endif %}
+    </div>
+    <div class="sub" style="border: none; padding: 0; margin: 0;">
+      {{ (rec.latest_status[:80] + '...') if rec.latest_status and rec.latest_status|length > 80 else (rec.latest_status or '-') }}
+    </div>
+  </div>
+  {% else %}
+  <div class="empty">관련 권고가 없습니다.</div>
+  {% endfor %}
+</div>
+{% endblock %}

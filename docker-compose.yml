@@ -1,0 +1,16 @@
+services:
+  db:
+    # pgvector 확장이 포함된 이미지. postgres:16과 완전 호환(같은 메이저 버전)이라
+    # 볼륨 데이터는 그대로 유지된다. 벡터 유사도 탐지(design-decisions.md 참고)를
+    # Chroma 같은 별도 서비스 없이 이 DB 안에서 처리하기 위함.
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

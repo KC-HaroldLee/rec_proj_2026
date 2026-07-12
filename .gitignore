@@ -1,0 +1,23 @@
+# 환경변수 (DB 비밀번호 등)
+.env
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+.claude/
+claude/
+
+# Claude Code 로컬 설정 (사용자별 권한 설정, 공유 X)
+.claude/settings.local.json
+
+# 원본 PDF (용량 큼 + data/docs 폴더에서 재배포 가능, repo에는 안 올림)
+data/docs/
+
+# 파싱 테스트용 스크래치 덤프 (재생성 가능한 임시 산출물)
+data/scratch/
+
+# OS/에디터
+.DS_Store
