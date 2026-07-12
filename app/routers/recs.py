@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.categories import resolve_category
+from app.categories import category_sort_key, resolve_category
 from app.db import get_conn
 from app.deps import require_login
 from app.markdown_render import render_markdown
@@ -15,10 +15,10 @@ def recs_list(request: Request, category: str | None = None, user: dict = Depend
     selected_category, filter_category = resolve_category(category)
 
     with get_conn() as conn:
-        categories = [
-            r["category"]
-            for r in conn.execute('SELECT DISTINCT category FROM "REC" ORDER BY category').fetchall()
-        ]
+        categories = sorted(
+            (r["category"] for r in conn.execute('SELECT DISTINCT category FROM "REC"').fetchall()),
+            key=category_sort_key,
+        )
         # rec_no는 "2-10" 같은 문자열이라 그냥 ORDER BY하면 "2-1" 다음에 "2-10"이
         # 오는 사전식 정렬이 된다. "-" 앞뒤를 숫자로 쪼개서 진짜 순서대로 정렬.
         recs = conn.execute(
@@ -81,7 +81,7 @@ def rec_detail(rec_id: int, request: Request, user: dict = Depends(require_login
         if impl_ids:
             feedback_rows = conn.execute(
                 '''
-                SELECT f.impl_id, f.content, f.evidence_url, f.created_at, a.auth_name
+                SELECT f.feedback_id, f.auth_id, f.impl_id, f.content, f.evidence_url, f.created_at, a.auth_name
                 FROM "FEEDBACK" f
                 JOIN "AUTH" a ON f.auth_id = a.auth_id
                 WHERE f.impl_id = ANY(%s)

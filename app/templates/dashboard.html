@@ -7,10 +7,12 @@
   <div class="stat">
     <div class="num">{{ total_recs }}</div>
     <div class="label">전체 권고 ({% for row in by_category %}{{ row.category }} {{ row.cnt }}{% if not loop.last %} · {% endif %}{% endfor %})</div>
+    <div class="sub-note">기관별로 나누면 {{ rec_inst_count }}건 (권고 1건이 여러 기관에 배정되는 경우 포함)</div>
   </div>
   <div class="stat warn">
     <div class="num">{{ stuck_items|length }}</div>
     <div class="label">정체(완전동일) · 의심(유사) 항목 수</div>
+    <div class="sub-note">권고-기관 조합(전체 {{ rec_inst_count }}건) 기준</div>
   </div>
   <div class="stat">
     <div class="num">{{ inst_count }}</div>
@@ -36,7 +38,7 @@
 
 <div class="section-title">
   <h2>최근 시민 피드백</h2>
-  <div class="more">전체 보기 →</div>
+  <div class="more"><a href="/feedback">전체 보기 →</a></div>
 </div>
 {% include "partials/feedback_feed.html" %}
 {% endblock %}

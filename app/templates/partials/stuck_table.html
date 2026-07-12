@@ -11,8 +11,8 @@
   <div class="row">
     <div class="no">{{ item.rec_no }}</div>
     <div class="content">
-      <a href="/recs/{{ item.rec_id }}">{{ item.content[:70] }}{% if item.content|length > 70 %}...{% endif %}</a>
       <div class="inst-tags"><span class="inst-tag">{{ item.inst_name }}</span></div>
+      <a href="/recs/{{ item.rec_id }}">{{ item.content[:70] }}{% if item.content|length > 70 %}...{% endif %}</a>
     </div>
     <div class="years">
       {% for y in item.years %}

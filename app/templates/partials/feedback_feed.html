@@ -1,12 +1,6 @@
 <div class="feed" id="feedback-feed">
   {% for item in recent_feedback %}
-  <div class="feed-item">
-    <div class="feed-avatar">{{ item.auth_name[:1] }}</div>
-    <div class="feed-body">
-      <div class="meta"><b>{{ item.auth_name }}</b> · 권고 {{ item.rec_no }} ({{ item.inst_name }}) · {{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
-      {{ item.content }}
-    </div>
-  </div>
+  {% with f = item %}{% include "partials/feedback_item.html" %}{% endwith %}
   {% else %}
   <div class="empty">아직 등록된 피드백이 없습니다.</div>
   {% endfor %}

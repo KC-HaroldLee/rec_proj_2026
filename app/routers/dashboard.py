@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from app.categories import resolve_category
+from app.categories import category_sort_key, resolve_category
 from app.db import get_conn
 from app.deps import require_login
 from app.stuck import SUSPECT_SIMILARITY_THRESHOLD, trailing_streak
@@ -14,17 +14,20 @@ def dashboard(request: Request, category: str | None = None, user: dict = Depend
     selected_category, filter_category = resolve_category(category)
 
     with get_conn() as conn:
-        by_category = conn.execute(
-            'SELECT category, COUNT(*) AS cnt FROM "REC" GROUP BY category'
-        ).fetchall()
-        categories = [
-            r["category"]
-            for r in conn.execute('SELECT DISTINCT category FROM "REC" ORDER BY category').fetchall()
-        ]
+        by_category = sorted(
+            conn.execute('SELECT category, COUNT(*) AS cnt FROM "REC" GROUP BY category').fetchall(),
+            key=lambda r: category_sort_key(r["category"]),
+        )
+        categories = sorted(
+            (r["category"] for r in conn.execute('SELECT DISTINCT category FROM "REC"').fetchall()),
+            key=category_sort_key,
+        )
         inst_count = conn.execute('SELECT COUNT(*) AS cnt FROM "INST"').fetchone()["cnt"]
+        rec_inst_count = conn.execute('SELECT COUNT(*) AS cnt FROM "REC_INST"').fetchone()["cnt"]
         recent_feedback = conn.execute(
             '''
-            SELECT f.content, f.created_at, a.auth_name, r.rec_no, i.name AS inst_name
+            SELECT f.feedback_id, f.auth_id, f.content, f.evidence_url, f.created_at,
+                   a.auth_name, r.rec_no, i.name AS inst_name
             FROM "FEEDBACK" f
             JOIN "AUTH" a ON f.auth_id = a.auth_id
             JOIN "IMPL" im ON f.impl_id = im.impl_id
@@ -103,7 +106,9 @@ def dashboard(request: Request, category: str | None = None, user: dict = Depend
             "by_category": by_category,
             "total_recs": sum(row["cnt"] for row in by_category),
             "inst_count": inst_count,
+            "rec_inst_count": rec_inst_count,
             "recent_feedback": recent_feedback,
+            "ctx": "feed",
             "stuck_items": stuck_items,
             "categories": categories,
             "selected_category": selected_category,

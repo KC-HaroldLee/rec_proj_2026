@@ -161,6 +161,7 @@ main { padding: 36px 32px 60px; max-width: 1100px; margin: 0 auto; }
 .stat .num { font-family: 'Noto Serif KR', serif; font-size: 30px; font-weight: 700; color: var(--deep); line-height: 1; }
 .stat.warn .num { color: var(--signal); }
 .stat .label { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.stat .sub-note { font-size: 11px; color: var(--muted); opacity: 0.75; margin-top: 4px; }
 
 /* ── 섹션 공통 ── */
 .section-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
@@ -180,7 +181,7 @@ main { padding: 36px 32px 60px; max-width: 1100px; margin: 0 auto; }
 .row .no { color: var(--muted); font-family: 'Noto Serif KR', serif; }
 .row .content { color: var(--ink); line-height: 1.5; }
 .row .content a { color: inherit; }
-.row .content .inst-tags { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+.row .content .inst-tags { margin-bottom: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
 .inst-tag { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); padding: 2px 7px; }
 
 .status-badge { font-size: 11.5px; padding: 4px 10px; display: inline-block; text-align: center; }

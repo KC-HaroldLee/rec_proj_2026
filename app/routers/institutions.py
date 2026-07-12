@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.categories import resolve_category
+from app.categories import category_sort_key, resolve_category
 from app.db import get_conn
 from app.deps import require_login
 from app.impl_timeline import fetch_institutions_timeline
@@ -20,10 +20,10 @@ def institutions_list(
     selected_category, filter_category = resolve_category(category)
 
     with get_conn() as conn:
-        categories = [
-            r["category"]
-            for r in conn.execute('SELECT DISTINCT category FROM "REC" ORDER BY category').fetchall()
-        ]
+        categories = sorted(
+            (r["category"] for r in conn.execute('SELECT DISTINCT category FROM "REC"').fetchall()),
+            key=category_sort_key,
+        )
         # 권고번호 칩 목록 — 지금 선택된 카테고리에 속한 것만 (예: 세월호 선택 중이면 2-1, 2-2...).
         # "-" 앞뒤를 숫자로 쪼개서 진짜 순서대로 정렬 (recs.py와 동일한 이유).
         rec_options = conn.execute(
@@ -117,10 +117,10 @@ def institution_detail(
         if not inst:
             raise HTTPException(status_code=404, detail="기관을 찾을 수 없습니다.")
 
-        categories = [
-            r["category"]
-            for r in conn.execute('SELECT DISTINCT category FROM "REC" ORDER BY category').fetchall()
-        ]
+        categories = sorted(
+            (r["category"] for r in conn.execute('SELECT DISTINCT category FROM "REC"').fetchall()),
+            key=category_sort_key,
+        )
 
         # rec_no는 "2-10" 같은 문자열이라 그냥 ORDER BY하면 사전식 정렬이 된다 (/recs와 동일한 이유로).
         # exact_same/similarity: recs.py 상세페이지와 같은 LAG 방식 — 연도별 "신호등" 사각형을

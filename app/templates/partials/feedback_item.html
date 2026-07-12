@@ -1,0 +1,21 @@
+<div class="feed-item" id="feedback-{{ f.feedback_id }}">
+  <div class="feed-avatar">{{ f.auth_name[:1] }}</div>
+  <div class="feed-body">
+    <div class="meta">
+      <b>{{ f.auth_name }}</b>{% if ctx == 'feed' %} · 권고 {{ f.rec_no }} ({{ f.inst_name }}){% endif %} · {{ f.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </div>
+    {{ f.content }}
+    {% if f.evidence_url %}<br><a href="{{ f.evidence_url }}" target="_blank" rel="noopener">근거 링크 →</a>{% endif %}
+    {% if user.auth_id == f.auth_id %}
+    <div style="display: flex; gap: 6px; margin-top: 6px;">
+      <button class="filter-chip" type="button"
+        hx-get="/feedback/{{ f.feedback_id }}/edit{% if ctx %}?ctx={{ ctx }}{% endif %}"
+        hx-target="#feedback-{{ f.feedback_id }}" hx-swap="outerHTML">수정</button>
+      <button class="filter-chip" type="button"
+        hx-post="/feedback/{{ f.feedback_id }}/delete"
+        hx-target="#feedback-{{ f.feedback_id }}" hx-swap="outerHTML"
+        hx-confirm="이 피드백을 삭제하시겠습니까?">삭제</button>
+    </div>
+    {% endif %}
+  </div>
+</div>
