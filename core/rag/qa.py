@@ -75,7 +75,9 @@ def answer_question(question: str) -> dict:
         with get_readonly_conn() as conn:
             rows = conn.execute(sql).fetchmany(MAX_ROWS)
     except Exception as e:
-        raise RagError(f"쿼리 실행 중 오류가 발생했습니다: {e}") from e
+        # 원인은 대부분 LLM이 생성한 SQL 자체가 질문과 안 맞는 경우(예: 데이터 조회와
+        # 무관한 인사말)라 원본 Postgres 에러를 그대로 보여줘봐야 사용자에게 의미가 없다.
+        raise RagError("질문을 이해하지 못했어요. 다르게 표현해서 다시 물어봐 주세요.") from e
 
     rows_json = json.dumps(_truncate_for_prompt(rows), ensure_ascii=False, default=str)
     answer_prompt = ANSWER_PROMPT_TEMPLATE.format(question=question, rows_json=rows_json)

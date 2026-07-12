@@ -11,6 +11,9 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 -- nomic-embed-text 임베딩 차원(768)에 맞춤. 다른 임베딩 모델로 바꾸면 차원이 달라질 수
 -- 있으니 이 컬럼 자체를 다시 만들어야 한다.
+-- (bge-m3, multilingual-e5-large 둘 다 시도했으나 이 도메인 텍스트에선 재탕/실질변화
+-- 구분력이 nomic-embed-text보다 떨어져서 복귀했다 — 관공서 문체 특성상 유사도가 전반적으로
+-- 높게 뭉치는 경향이 있어 임계값 기반 분리가 어려움.)
 ALTER TABLE "IMPL" ADD COLUMN IF NOT EXISTS "embedding" vector(768);
 
 -- 어떤 모델로 만든 벡터인지 기록. 모델을 바꾸면 벡터 공간이 달라져 이전 임베딩과
