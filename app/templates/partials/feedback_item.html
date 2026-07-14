@@ -4,8 +4,8 @@
     <div class="meta">
       <b>{{ f.auth_name }}</b>{% if ctx == 'feed' %} · 권고 {{ f.rec_no }} ({{ f.inst_name }}){% endif %} · {{ f.created_at.strftime('%Y-%m-%d %H:%M') }}
     </div>
-    {{ f.content }}
-    {% if f.evidence_url %}<br><a href="{{ f.evidence_url }}" target="_blank" rel="noopener">근거 링크 →</a>{% endif %}
+    <div class="markdown-body feed-content">{{ f.content_html | safe }}</div>
+    {% if f.evidence_url %}<a href="{{ f.evidence_url }}" target="_blank" rel="noopener">근거 링크 →</a>{% endif %}
     {% if user.auth_id == f.auth_id %}
     <div style="display: flex; gap: 6px; margin-top: 6px;">
       <button class="filter-chip" type="button"

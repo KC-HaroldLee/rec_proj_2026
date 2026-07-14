@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from app.categories import category_sort_key, resolve_category
 from app.db import get_conn
 from app.deps import require_login
-from app.markdown_render import render_markdown
+from app.markdown_render import render_feedback_markdown, render_markdown
 from app.stuck import classify_year
 from app.templates_env import templates
 
@@ -102,6 +102,7 @@ def rec_detail(rec_id: int, request: Request, user: dict = Depends(require_login
 
     feedback_by_impl: dict[int, list] = {}
     for f in feedback_rows:
+        f["content_html"] = render_feedback_markdown(f["content"])
         feedback_by_impl.setdefault(f["impl_id"], []).append(f)
 
     institutions: dict[int, dict] = {}

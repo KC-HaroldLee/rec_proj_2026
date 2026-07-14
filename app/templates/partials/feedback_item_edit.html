@@ -3,8 +3,13 @@
   <div class="feed-body" style="flex: 1;">
     <form hx-post="/feedback/{{ f.feedback_id }}{% if ctx %}?ctx={{ ctx }}{% endif %}"
       hx-target="#feedback-{{ f.feedback_id }}" hx-swap="outerHTML"
-      style="display: flex; flex-direction: column; gap: 8px;">
-      <input type="text" name="content" value="{{ f.content }}" required>
+      class="feedback-form" style="margin-top: 0;">
+      <div class="md-toolbar">
+        <button type="button" class="md-btn" data-md="bold" title="굵게">B</button>
+        <button type="button" class="md-btn md-btn-italic" data-md="italic" title="기울임">I</button>
+        <button type="button" class="md-btn" data-md="list" title="목록">•</button>
+      </div>
+      <textarea name="content" rows="10" required>{{ f.content }}</textarea>
       <input type="text" name="evidence_url" value="{{ f.evidence_url or '' }}" placeholder="근거 링크 (선택)">
       <div style="display: flex; gap: 8px;">
         <button class="btn" type="submit" style="width: auto; padding: 8px 18px; margin-top: 0;">저장</button>

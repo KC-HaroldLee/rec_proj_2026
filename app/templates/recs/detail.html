@@ -77,9 +77,14 @@
         {% endfor %}
 
         <form class="feedback-form" method="post" action="/impl/{{ y.impl_id }}/feedback">
-          <input type="text" name="content" placeholder="이 이행현황에 대한 검증 기록을 남겨주세요" required>
-          <input type="text" name="evidence_url" placeholder="근거 링크 (선택)" style="flex: 0.6;">
-          <button type="submit">등록</button>
+          <div class="md-toolbar">
+            <button type="button" class="md-btn" data-md="bold" title="굵게">B</button>
+            <button type="button" class="md-btn md-btn-italic" data-md="italic" title="기울임">I</button>
+            <button type="button" class="md-btn" data-md="list" title="목록">•</button>
+          </div>
+          <textarea name="content" rows="10" placeholder="이 이행현황에 대한 검증 기록을 남겨주세요 (마크다운 **굵게**, *기울임*, - 목록 지원)" required></textarea>
+          <input type="text" name="evidence_url" placeholder="근거 링크 (선택)">
+          <button type="submit" class="feedback-submit">등록</button>
         </form>
       </div>
     </div>

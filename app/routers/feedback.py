@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse, Response
 
 from app.db import get_conn
 from app.deps import require_login
+from app.markdown_render import render_feedback_markdown
 from app.templates_env import templates
 
 router = APIRouter()
@@ -24,6 +25,7 @@ def _fetch_feedback(conn, feedback_id: int):
     row = conn.execute(_FEEDBACK_BY_ID, (feedback_id,)).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="피드백을 찾을 수 없습니다.")
+    row["content_html"] = render_feedback_markdown(row["content"])
     return row
 
 
@@ -49,6 +51,9 @@ def feedback_list(request: Request, user: dict = Depends(require_login)):
             ORDER BY f.created_at DESC
             '''
         ).fetchall()
+
+    for f in recent_feedback:
+        f["content_html"] = render_feedback_markdown(f["content"])
 
     return templates.TemplateResponse(
         request,
