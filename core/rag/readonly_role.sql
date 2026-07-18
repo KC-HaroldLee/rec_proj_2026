@@ -25,7 +25,7 @@ GRANT USAGE ON SCHEMA public TO rec_readonly;
 
 -- AUTH는 의도적으로 제외 (password_hash 보호).
 GRANT SELECT ON
-    "REC", "INST", "REC_INST", "EVID", "REC_EVID", "IMPL", "FEEDBACK", "TERM"
+    "REC", "INST", "REC_INST", "EVID", "REC_EVID", "IMPL", "FEEDBACK", "FEEDBACK_EVIDENCE", "TERM"
 TO rec_readonly;
 
 ALTER ROLE rec_readonly SET default_transaction_read_only = on;

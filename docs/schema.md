@@ -3,7 +3,7 @@
 사참위(사회적참사특별조사위원회) 권고 이행보고 시민 모니터링 시스템의 데이터베이스 스키마.
 DBMS: PostgreSQL
 
-## 테이블 개요 (총 9개)
+## 테이블 개요 (총 10개)
 
 | 테이블 | 역할 |
 |---|---|
@@ -15,6 +15,7 @@ DBMS: PostgreSQL
 | REC_EVID | 권고↔조사자료 연결 (다대다) |
 | AUTH | 계정 (팀원 로그인) |
 | FEEDBACK | 시민 피드백 |
+| FEEDBACK_EVIDENCE | 피드백 근거자료 링크 (1:N) |
 | TERM | 용어사전 |
 
 ## ERD 관계 요약
@@ -24,8 +25,8 @@ INST ──┐
        ├── REC_INST ──┐
 REC ───┘              │
   │                    ├── IMPL ── FEEDBACK ── AUTH
-  ├── REC_EVID ──┐     │
-EVID ─────────────┘    │
+  ├── REC_EVID ──┐     │              │
+EVID ─────────────┘    │              └── FEEDBACK_EVIDENCE
                         │
 AUTH ── TERM (작성자/수정자)
 ```
@@ -154,16 +155,40 @@ CREATE TABLE "AUTH" (
 이행보고에 대한 문제제기. "정부가 이행완료라 했지만 실제로는..." 같은
 검증 기록을 쌓기 위한 테이블.
 
+`link_id`(REC_INST)는 항상 채운다. `impl_id`는 특정 연도 보고를 겨냥한 피드백일 때만
+채우고, 이행보고 자체가 아직 한 번도 없는 (기관, 권고) 조합에 대한 피드백(예:
+국회의장처럼 아무 응답도 안 한 기관)은 `impl_id`를 NULL로 둔다. IMPL 테이블에 "안
+냈다"는 뜻의 가짜 row를 넣지 않기로 한 이유: IMPL은 뱃지 계산(LAG 비교)·임베딩·
+대시보드가 참조하는 "실제 제출된 보고" 테이블이라, 합성 row를 섞으면 그 로직들이
+오염된다. 2026-07-15에 impl_id 단독 FK에서 이 구조로 변경.
+
 ```sql
 CREATE TABLE "FEEDBACK" (
     "feedback_id"  SERIAL PRIMARY KEY,
-    "impl_id"      INTEGER NOT NULL,
+    "link_id"      INTEGER NOT NULL,
+    "impl_id"      INTEGER NULL,
     "auth_id"      INTEGER NOT NULL,
     "content"      TEXT NOT NULL,
-    "evidence_url" VARCHAR(300) NULL,
     "created_at"   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "FK_FEEDBACK_REC_INST" FOREIGN KEY ("link_id") REFERENCES "REC_INST" ("link_id"),
     CONSTRAINT "FK_FEEDBACK_IMPL" FOREIGN KEY ("impl_id") REFERENCES "IMPL" ("impl_id"),
     CONSTRAINT "FK_FEEDBACK_AUTH" FOREIGN KEY ("auth_id") REFERENCES "AUTH" ("auth_id")
+);
+```
+
+## 8-1. FEEDBACK_EVIDENCE (피드백 근거자료 링크)
+
+피드백 하나에 근거 링크를 여러 개 달 수 있도록 분리한 자식 테이블
+(원래는 `FEEDBACK.evidence_url` 단일 컬럼이었으나 2026-07-14에 1:N으로 정규화).
+피드백이 삭제되면 근거 링크도 같이 지워진다(`ON DELETE CASCADE`).
+
+```sql
+CREATE TABLE "FEEDBACK_EVIDENCE" (
+    "evidence_id"  SERIAL PRIMARY KEY,
+    "feedback_id"  INTEGER NOT NULL,
+    "url"          VARCHAR(300) NOT NULL,
+    CONSTRAINT "FK_FEEDBACK_EVIDENCE_FEEDBACK"
+        FOREIGN KEY ("feedback_id") REFERENCES "FEEDBACK" ("feedback_id") ON DELETE CASCADE
 );
 ```
 
@@ -197,6 +222,8 @@ CREATE INDEX "idx_rec_no"       ON "REC" ("rec_no");
 CREATE INDEX "idx_impl_year"    ON "IMPL" ("year");
 CREATE INDEX "idx_impl_status"  ON "IMPL" ("status");
 CREATE INDEX "idx_feedback_impl" ON "FEEDBACK" ("impl_id");
+CREATE INDEX "idx_feedback_link" ON "FEEDBACK" ("link_id");
+CREATE INDEX "idx_feedback_evidence_feedback" ON "FEEDBACK_EVIDENCE" ("feedback_id");
 ```
 
 ## 대표 쿼리 예시

@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}사참위 권고 이행 모니터링{% endblock %}</title>
 <link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/easymde.min.css">
 <script src="/static/js/htmx.min.js" defer></script>
-<script src="/static/js/feedback-toolbar.js" defer></script>
+<script src="/static/js/easymde.min.js" defer></script>
+<script src="/static/js/feedback-editor.js" defer></script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
 
@@ -17,7 +19,6 @@
     <a href="/" class="{{ 'active' if active_nav == 'dashboard' else '' }}">대시보드</a>
     <a href="/recs" class="{{ 'active' if active_nav == 'recs' else '' }}">권고 목록</a>
     <a href="/institutions" class="{{ 'active' if active_nav == 'institutions' else '' }}">기관별 현황</a>
-    <a href="/terms" class="{{ 'active' if active_nav == 'terms' else '' }}">용어사전</a>
   </nav>
   <div class="user-chip">
     {% if user %}

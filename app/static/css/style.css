@@ -3,7 +3,7 @@
 :root {
   --ink: #1c2321;
   --paper: #f4f2ec;
-  --paper-2: #eeebe1;
+  --paper-2: #dbcfa6;
   --line: #d8d4c8;
   --deep: #1e3a3a;
   --deep-2: #2a4d4d;
@@ -200,7 +200,7 @@ main { padding: 36px 32px 60px; max-width: 1100px; margin: 0 auto; }
 
 /* ── 피드백 피드 ── */
 .feed { border: 1px solid var(--line); background: #fff; }
-.feed-item { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; gap: 14px; }
+.feed-item { padding: 16px 18px; background: var(--paper-2); border-bottom: 1px solid var(--line); display: flex; gap: 14px; }
 .feed-item:last-child { border-bottom: none; }
 .feed-avatar {
   width: 30px; height: 30px;
@@ -224,6 +224,9 @@ main { padding: 36px 32px 60px; max-width: 1100px; margin: 0 auto; }
 .markdown-body p { margin-bottom: 10px; }
 .markdown-body ul, .markdown-body ol { margin: 0 0 10px 20px; }
 .markdown-body blockquote { border-left: 2px solid var(--line); padding-left: 14px; margin: 10px 0; color: var(--muted); font-size: 13px; }
+.markdown-body table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 13px; display: block; overflow-x: auto; }
+.markdown-body th, .markdown-body td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; white-space: nowrap; }
+.markdown-body th { background: var(--paper); font-weight: 600; }
 
 /* ── 권고 상세: 기관별 이행현황 타임라인 ── */
 .inst-block { margin-bottom: 40px; }
@@ -234,19 +237,22 @@ main { padding: 36px 32px 60px; max-width: 1100px; margin: 0 auto; }
 .timeline-year .year-label { font-family: 'Noto Serif KR', serif; font-weight: 700; color: var(--deep); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
 .field-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 10px 0 4px; }
 
-.feedback-mini { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 10px; }
-.feedback-mini .feed-item { padding: 8px 0; border: none; }
+.feedback-mini { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.feedback-mini .feed-item { padding: 10px 12px; border: none; border-radius: 3px; }
 .feedback-form { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
 .feedback-form textarea,
 .feedback-form input[type=text] { padding: 9px 12px; border: 1px solid var(--line); font-size: 13px; font-family: inherit; background: #fff; }
 .feedback-form textarea { resize: vertical; min-height: 46px; }
 .feedback-submit { align-self: flex-start; padding: 9px 18px; background: var(--deep); color: var(--paper); border: none; font-size: 12.5px; font-weight: 600; cursor: pointer; }
 
-/* ── 피드백 마크다운 툴바 (굵게/목록만 지원하는 최소 버전) ── */
-.md-toolbar { display: flex; gap: 4px; }
-.md-btn { width: 26px; height: 26px; border: 1px solid var(--line); background: #fff; border-radius: 2px; font-size: 12px; cursor: pointer; line-height: 1; font-weight: 700; }
-.md-btn:hover { background: var(--paper); }
-.md-btn-italic { font-style: italic; font-weight: 400; }
+/* ── 근거 링크 여러 개 입력 (동적 행 추가/삭제) ── */
+.evidence-field { display: flex; flex-direction: column; gap: 4px; }
+.evidence-row { display: flex; gap: 6px; }
+.evidence-row input[type=text] { flex: 1; }
+.evidence-remove { flex: 0 0 auto; padding: 0 10px; }
+.evidence-add { align-self: flex-start; }
+
+.feed-evidence { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
 
 .feed-body .markdown-body { font-size: 13px; margin-bottom: 4px; }
 .feed-body .markdown-body p:last-child,

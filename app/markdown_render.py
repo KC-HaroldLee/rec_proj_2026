@@ -14,7 +14,7 @@ def render_markdown(text: str | None) -> str | None:
     if not text:
         return None
     unescaped = text.replace("\\n", "\n").replace("\\-", "-")
-    return _markdown.markdown(unescaped, extensions=["nl2br"])
+    return _markdown.markdown(unescaped, extensions=["nl2br", "tables"])
 
 
 def render_feedback_markdown(text: str | None) -> str | None:
@@ -23,4 +23,4 @@ def render_feedback_markdown(text: str | None) -> str | None:
     (**, -)은 안 건드리면서 <, > 등만 먼저 escape해 저장형 XSS를 막는다."""
     if not text:
         return None
-    return _markdown.markdown(_html.escape(text), extensions=["nl2br"])
+    return _markdown.markdown(_html.escape(text), extensions=["nl2br", "tables"])

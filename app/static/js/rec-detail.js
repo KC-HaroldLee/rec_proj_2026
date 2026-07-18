@@ -23,6 +23,22 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  var initial = (location.hash || '').replace('#inst-', '') || tabs[0].dataset.inst;
-  show(initial);
+  // 피드백 등록/수정 후에는 "#impl-N"으로 리다이렉트되는데(feedback.py),
+  // 이 경우에도 해당 impl이 속한 기관 탭이 선택되도록 처리한다.
+  var rawHash = (location.hash || '').slice(1);
+  var instId, scrollTarget;
+  if (rawHash.indexOf('impl-') === 0) {
+    var implEl = document.getElementById(rawHash);
+    var block = implEl && implEl.closest('[data-inst-block]');
+    if (block) {
+      instId = block.dataset.instBlock;
+      scrollTarget = implEl;
+    }
+  } else if (rawHash.indexOf('inst-') === 0) {
+    instId = rawHash.slice('inst-'.length);
+  }
+  if (!instId) instId = tabs[0].dataset.inst;
+
+  show(instId);
+  if (scrollTarget) scrollTarget.scrollIntoView();
 });

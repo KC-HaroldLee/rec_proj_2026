@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Request
 from app.categories import category_sort_key, resolve_category
 from app.db import get_conn
 from app.deps import require_login
+from app.feedback_render import attach_feedback_extras
 from app.stuck import SUSPECT_SIMILARITY_THRESHOLD, trailing_streak
 from app.templates_env import templates
 
@@ -26,18 +27,18 @@ def dashboard(request: Request, category: str | None = None, user: dict = Depend
         rec_inst_count = conn.execute('SELECT COUNT(*) AS cnt FROM "REC_INST"').fetchone()["cnt"]
         recent_feedback = conn.execute(
             '''
-            SELECT f.feedback_id, f.auth_id, f.content, f.evidence_url, f.created_at,
+            SELECT f.feedback_id, f.auth_id, f.content, f.created_at,
                    a.auth_name, r.rec_no, i.name AS inst_name
             FROM "FEEDBACK" f
             JOIN "AUTH" a ON f.auth_id = a.auth_id
-            JOIN "IMPL" im ON f.impl_id = im.impl_id
-            JOIN "REC_INST" ri ON im.link_id = ri.link_id
+            JOIN "REC_INST" ri ON f.link_id = ri.link_id
             JOIN "REC" r ON ri.rec_id = r.rec_id
             JOIN "INST" i ON ri.inst_id = i.inst_id
             ORDER BY f.created_at DESC
             LIMIT 10
             '''
         ).fetchall()
+        attach_feedback_extras(conn, recent_feedback)
         # docs/design-decisions.md "이행현황이 기관별로 다르게 오는지 여부"가 아직 미확인이라,
         # rec 단위로 뭉치지 않고 REC_INST 링크(권고+기관 조합) 단위로 행을 만든다.
         # LAG 윈도우 함수로 "바로 전 연도와 완전일치인지"(exact_same, SQL 완전일치 방식)와

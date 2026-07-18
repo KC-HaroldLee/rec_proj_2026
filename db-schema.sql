@@ -75,17 +75,31 @@ CREATE TABLE "IMPL" (
 );
 
 -- 8. 시민 피드백 (이행보고에 대한 문제제기)
+-- link_id: 항상 채움 (REC_INST 기준 — "이 기관·이 권고"에 대한 피드백이라는 뜻).
+-- impl_id: 특정 연도 보고를 겨냥한 피드백이면 채움, 이행보고 자체가 없는 상태에
+--   대한 피드백(예: 국회의장처럼 한 번도 보고 안 한 기관)이면 NULL.
 CREATE TABLE "FEEDBACK" (
     "feedback_id"  SERIAL PRIMARY KEY,       -- 피드백ID
-    "impl_id"      INTEGER NOT NULL,         -- 이행보고ID (FK)
+    "link_id"      INTEGER NOT NULL,         -- 권고-기관 연결ID (FK)
+    "impl_id"      INTEGER NULL,             -- 이행보고ID (FK, 특정 연도 보고 대상일 때만)
     "auth_id"      INTEGER NOT NULL,         -- 작성자 계정ID (FK)
     "content"      TEXT NOT NULL,            -- 문제제기 내용
-    "evidence_url" VARCHAR(300) NULL,        -- 근거자료 링크
     "created_at"   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 작성일시
+    CONSTRAINT "FK_FEEDBACK_REC_INST"
+        FOREIGN KEY ("link_id") REFERENCES "REC_INST" ("link_id"),
     CONSTRAINT "FK_FEEDBACK_IMPL"
         FOREIGN KEY ("impl_id") REFERENCES "IMPL" ("impl_id"),
     CONSTRAINT "FK_FEEDBACK_AUTH"
         FOREIGN KEY ("auth_id") REFERENCES "AUTH" ("auth_id")
+);
+
+-- 8-1. 피드백 근거자료 링크 (피드백 1개에 여러 개 가능)
+CREATE TABLE "FEEDBACK_EVIDENCE" (
+    "evidence_id"  SERIAL PRIMARY KEY,       -- 근거링크ID
+    "feedback_id"  INTEGER NOT NULL,         -- 피드백ID (FK)
+    "url"          VARCHAR(300) NOT NULL,    -- 근거자료 링크
+    CONSTRAINT "FK_FEEDBACK_EVIDENCE_FEEDBACK"
+        FOREIGN KEY ("feedback_id") REFERENCES "FEEDBACK" ("feedback_id") ON DELETE CASCADE
 );
 
 -- 9. 용어사전
@@ -109,7 +123,9 @@ CREATE TABLE "TERM" (
 -- ============================================
 CREATE INDEX "idx_rec_no" ON "REC" ("rec_no");
 CREATE INDEX "idx_impl_year" ON "IMPL" ("year");
+CREATE INDEX "idx_feedback_evidence_feedback" ON "FEEDBACK_EVIDENCE" ("feedback_id");
 -- status는 마크다운 풀텍스트라 btree 튜플 크기 제한을 넘을 수 있음.
 -- "이행현황 완전동일 여부(등호 비교)" 조회만 지원하면 되므로 HASH 인덱스 사용.
 CREATE INDEX "idx_impl_status" ON "IMPL" USING HASH ("status");
 CREATE INDEX "idx_feedback_impl" ON "FEEDBACK" ("impl_id");
+CREATE INDEX "idx_feedback_link" ON "FEEDBACK" ("link_id");

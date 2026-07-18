@@ -1,0 +1,6 @@
+{% macro evidence_row(url='') %}
+<div class="evidence-row">
+  <input type="text" name="evidence_url" value="{{ url }}" placeholder="근거 링크 (선택)">
+  <button type="button" class="filter-chip evidence-remove" aria-label="링크 삭제">×</button>
+</div>
+{% endmacro %}

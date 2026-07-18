@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/_evidence_field.html" import evidence_row %}
 
 {% block title %}{{ rec.rec_no }} - 사참위 권고 이행 모니터링{% endblock %}
 
@@ -18,13 +19,25 @@
 </div>
 {% endif %}
 
+<div class="section-title"><h2>관련조사자료</h2></div>
+<div class="table" style="margin-bottom: 24px;">
+  {% for evid in evidences %}
+  <div class="row" style="grid-template-columns: 100px 1fr;">
+    <div class="no">{{ evid.code or '-' }}</div>
+    <div class="content">{{ evid.title }}</div>
+  </div>
+  {% else %}
+  <div class="empty">관련조사자료 없음</div>
+  {% endfor %}
+</div>
+
 <div class="section-title"><h2>대상기관·연도별 이행현황</h2></div>
-<p class="sub" style="border: none; padding: 0; margin-bottom: 20px;">
+<!-- <p class="sub" style="border: none; padding: 0; margin-bottom: 20px;">
   아래 "이행현황"·"향후계획"은 해당 기관이 스스로 작성해 제출한 자기보고입니다.
   옆의 배지는 저희가 전년도 대비 텍스트가 객관적으로 바뀌었는지만 비교한 결과이며,
   실제로 이행이 됐는지 판단하는 게 아닙니다 — 정부 주장과 객관적 증거를 나란히 두고
   직접 비교해보시라는 취지입니다.
-</p>
+</p> -->
 
 {% if institutions|length > 1 %}
 <div class="filters" style="margin-bottom: 24px;">
@@ -38,12 +51,13 @@
 {% for inst in institutions %}
 <div class="inst-block" id="inst-{{ inst.inst_id }}" data-inst-block="{{ inst.inst_id }}">
   <h3><a href="/institutions/{{ inst.inst_id }}">{{ inst.name }}</a></h3>
-  {% if inst.years %}
   <div class="timeline">
     {% for y in inst.years %}
-    <div class="timeline-year" id="impl-{{ y.impl_id }}">
+    {% set slot_id = 'impl-' ~ y.impl_id if y.impl_id else 'link-' ~ inst.link_id %}
+    {% set feedback_action = '/impl/' ~ y.impl_id ~ '/feedback' if y.impl_id else '/link/' ~ inst.link_id ~ '/feedback' %}
+    <div class="timeline-year" id="{{ slot_id }}">
       <div class="year-label">
-        {{ y.year }}
+        {% if y.year %}{{ y.year }}{% else %}보고 없음{% endif %}
         {% if y.badge == 'stuck' %}<span class="status-badge stuck">{{ y.badge_label }}</span>
         {% elif y.badge == 'suspect' %}<span class="status-badge suspect">{{ y.badge_label }}</span>
         {% elif y.badge == 'progress' %}<span class="status-badge progress">{{ y.badge_label }}</span>
@@ -53,7 +67,11 @@
 
       {% if not y.status_html and not y.plan_html %}
       <p class="sub" style="margin: 0 0 8px; padding: 8px 10px; border: 1px dashed var(--line); background: var(--paper);">
+        {% if y.impl_id %}
         이 연도는 이행현황·향후계획이 모두 비어있는 보고입니다 (원문 자체에 내용 없음).
+        {% else %}
+        이 기관은 이 권고에 대해 아직 이행보고를 제출하지 않았습니다.
+        {% endif %}
       </p>
       {% endif %}
 
@@ -67,7 +85,7 @@
       <div class="markdown-body">{{ y.plan_html | safe }}</div>
       {% endif %}
 
-      {% if y.source %}<p class="sub" style="margin: 8px 0 0; padding: 0; border: none;">출처: {{ y.source }}</p>{% endif %}
+      {% if y.source %}<p class="sub" style="margin: 8px 0 0; padding: 0; border: none;">출처: <a href="/docs/rec/{{ y.source }}" target="_blank" rel="noopener">{{ y.source }}</a></p>{% endif %}
 
       <div class="feedback-mini">
         {% for f in y.feedback %}
@@ -76,37 +94,27 @@
         <p class="sub" style="margin: 0; padding: 0; border: none;">등록된 피드백이 없습니다.</p>
         {% endfor %}
 
-        <form class="feedback-form" method="post" action="/impl/{{ y.impl_id }}/feedback">
-          <div class="md-toolbar">
-            <button type="button" class="md-btn" data-md="bold" title="굵게">B</button>
-            <button type="button" class="md-btn md-btn-italic" data-md="italic" title="기울임">I</button>
-            <button type="button" class="md-btn" data-md="list" title="목록">•</button>
+        <button type="button" class="filter-chip feedback-toggle" id="feedback-toggle-{{ slot_id }}" data-form="feedback-new-{{ slot_id }}">+ 피드백 달기</button>
+
+        <form class="feedback-form" id="feedback-new-{{ slot_id }}" data-toggle="feedback-toggle-{{ slot_id }}"
+          method="post" action="{{ feedback_action }}" style="display: none;">
+          <textarea name="content" class="md-editor" rows="10" placeholder="{{ '이 이행현황에 대한 검증 기록을 남겨주세요' if y.impl_id else '이행보고가 없다는 사실 자체에 대한 문제제기를 남겨주세요' }}" required></textarea>
+          <div class="evidence-field">
+            <div class="evidence-rows">{{ evidence_row() }}</div>
+            <template class="evidence-row-template">{{ evidence_row() }}</template>
+            <button type="button" class="filter-chip evidence-add">+ 링크 추가</button>
           </div>
-          <textarea name="content" rows="10" placeholder="이 이행현황에 대한 검증 기록을 남겨주세요 (마크다운 **굵게**, *기울임*, - 목록 지원)" required></textarea>
-          <input type="text" name="evidence_url" placeholder="근거 링크 (선택)">
-          <button type="submit" class="feedback-submit">등록</button>
+          <div style="display: flex; gap: 8px;">
+            <button type="submit" class="feedback-submit">등록</button>
+            <button type="button" class="filter-chip feedback-cancel">취소</button>
+          </div>
         </form>
       </div>
     </div>
     {% endfor %}
   </div>
-  {% else %}
-  <p class="sub" style="margin: 0 0 20px; padding: 0; border: none;">아직 등록된 이행보고가 없습니다.</p>
-  {% endif %}
 </div>
 {% else %}
 <p class="empty">대상기관 정보 없음</p>
 {% endfor %}
-
-<div class="section-title"><h2>관련조사자료</h2></div>
-<div class="table" style="margin-bottom: 24px;">
-  {% for evid in evidences %}
-  <div class="row" style="grid-template-columns: 100px 1fr;">
-    <div class="no">{{ evid.code or '-' }}</div>
-    <div class="content">{{ evid.title }}</div>
-  </div>
-  {% else %}
-  <div class="empty">관련조사자료 없음</div>
-  {% endfor %}
-</div>
 {% endblock %}

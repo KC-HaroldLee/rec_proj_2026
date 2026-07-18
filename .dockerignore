@@ -1,0 +1,12 @@
+.venv
+__pycache__
+*.pyc
+.env
+.git
+.claude
+.vscode
+data
+docs
+scripts
+db_init.sh
+docker-compose.yml

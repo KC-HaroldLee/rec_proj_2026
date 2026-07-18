@@ -23,6 +23,7 @@ CREATE TABLE "INST" (inst_id, name, note);
 CREATE TABLE "EVID" (evid_id, code, title);
 CREATE TABLE "REC_EVID" (link_id, rec_id, evid_id);
 CREATE TABLE "IMPL" (impl_id, link_id, year, status, plan, source);
-CREATE TABLE "FEEDBACK" (feedback_id, impl_id, auth_id, content, evidence_url, created_at);
+CREATE TABLE "FEEDBACK" (feedback_id, link_id, impl_id, auth_id, content, created_at);
+CREATE TABLE "FEEDBACK_EVIDENCE" (evidence_id, feedback_id, url);
 CREATE TABLE "TERM" (term_id, term, definition, context, category);
 """
